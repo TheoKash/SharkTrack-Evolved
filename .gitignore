@@ -4,3 +4,5 @@ models/*
 *.pth
 */__pycache__/
 */TrackEval
+
+.venv/
