@@ -11,19 +11,29 @@ root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 from trackers.yolo import YoloTracker
 from trackers.sort_adapter import Sort_adapter
-from evaluation.utils import target2pred_align, get_torch_device, plot_performance_graph, extract_frame_number, save_trackeval_annotations
+from evaluation.utils import align_annotations_with_predictions_dict_corrected, target2pred_align, get_torch_device, plot_performance_graph, extract_frame_number, save_trackeval_annotations
 from evaluation.TrackEval.scripts.run_mot_challenge_functional import run_mot_challenge
 
 
 sequences_path = '/vol/biomedic3/bglocker/ugproj2324/fv220/datasets/phase2'
 sequences_path = '/vol/biomedic3/bglocker/ugproj2324/fv220/datasets/frame_extraction_raw/val1/frames_5fps'
+sequences_path = '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Videos'
 VAL_SEQUENCES = [
-  'val1_difficult1',
-  'val1_difficult2',
-  'val1_easy1',
-  'val1_easy2',
-  'val1_medium1',
-  'val1_medium2',
+  'easy1',
+  # 'easy2',
+  # 'medium1',
+  # 'medium2',
+  # 'difficult1',
+  # 'difficult2',
+  # 'difficult3',
+  # Original sequences
+  # 'val1_difficult1',
+  # 'val1_difficult2',
+  # 'val1_easy1',
+  # 'val1_easy2',
+  # 'val1_medium1',
+  # 'val1_medium2',
+  # End of original sequences
   # 'sp_natgeo2',
   # 'gfp_hawaii1',
   # 'shlife_scalloped4',
@@ -49,17 +59,17 @@ def compute_clear_metrics():
   for sequence in sequence_metrics:
     mota = round(sequence_metrics[sequence]['MOTA'], 2)
     motp = round(sequence_metrics[sequence]['MOTP'], 2)
-    idf1 = round(sequence_metrics[sequence]['IDF1'], 2)
-    hota = round(sequence_metrics[sequence]['HOTA(0)'], 2)
+    # idf1 = round(sequence_metrics[sequence]['IDF1'], 2)
+    # hota = round(sequence_metrics[sequence]['HOTA(0)'], 2)
     motas += mota
     motps += motp
-    idf1s += idf1
-    hotas += hota
+    # idf1s += idf1
+    # hotas += hota
   
   motas = round(motas / len(sequence_metrics), 2)
   motps = round(motps / len(sequence_metrics), 2)
-  idf1s = round(idf1s / len(sequence_metrics), 2)
-  hotas = round(hotas / len(sequence_metrics), 2)
+  # idf1s = round(idf1s / len(sequence_metrics), 2)
+  # hotas = round(hotas / len(sequence_metrics), 2)
 
   return motas, motps, idf1s, hotas
 
@@ -73,23 +83,27 @@ def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, img
     annotations_path = os.path.join(sequence_path, 'annotations.csv')
     assert os.path.exists(annotations_path), f'annotations file does not exist {annotations_path}'
     annotations = pd.read_csv(annotations_path)
+    
+    # new ( I added the sequunce of frames from the transcoder alligned video to each file under 'frames' )
+    sequence_path = os.path.join(sequence_path, 'frames')
 
     print(f"Evaluating {sequence}")
     tracker_obj = tracker_class.get(tracker_type, YoloTracker) # default to YoloTracker for custom trackers
     tracker = tracker_obj(model_path, tracker_type)
     results, time = tracker.track(sequence_path, conf_threshold, iou_association_threshold, imgsz) # [bbox_xyxys, confidences, track_ids]
     track_time += time
-
+    
     # Annotations for visualisation
-    aligned_annotations = target2pred_align(annotations, results, sequence_path, tracker=tracker_type)
+    aligned_annotations = align_annotations_with_predictions_dict_corrected(annotations, results, 20)
     all_aligned_annotations[sequence] = (aligned_annotations)
 
-    # plot_performance_graph(aligned_annotations, sequence)
+    plot_performance_graph(aligned_annotations, sequence)
 
   motas, motps, idf1s = 0, 0, 0 
   
   if tracker:
     # save prediction annotations to calculate metrics
+    print(all_aligned_annotations)
     save_trackeval_annotations(all_aligned_annotations)
     motas, motps, idf1s, hotas = compute_clear_metrics()
 

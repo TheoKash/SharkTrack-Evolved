@@ -26,9 +26,12 @@ def save_trackeval_annotations(annotations):
     }
     """
     benchmark = 'val1'
-    tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/MPNTrack/data'
-    gt_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/gt/mot_challenge/'
-    dummy_ini = '/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/gt/seqinfo.ini'
+    # tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/MPNTrack/data'
+    tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/easy1/data'
+    # gt_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/gt/mot_challenge/'
+    gt_annotations_path = f'/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/gt/mot_challenge/'
+    dummy_ini = '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/gt/seqinfo.ini'
+    # dummy_ini = '/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/gt/seqinfo.ini'
 
     # Create seqmaps folder
     seqmaps_path = os.path.join(gt_annotations_path, 'seqmaps')
@@ -93,7 +96,9 @@ def target2pred_align(annotations, track_predictions, sequence_path, tracker):
 
     for _, frame_annotations in annotations.groupby('Filename'):
         frame_name = frame_annotations["Filename"].values[0]
-        i = frames.index(frame_name)
+        # i = frames.index(frame_name)
+        index = frame_name[len('annotations_frame'):]
+        i = frames.index('0' * (9-len(index)) + index)
 
         gt_bbox_xyxys[i] = frame_annotations[["xmin", "ymin", "xmax", "ymax"]].values.tolist()
         gt_track_ids[i] = frame_annotations["track_id"].values.tolist()
@@ -147,11 +152,12 @@ def align_annotations_with_predictions_dict_corrected(annotations, track_predict
         "gt_track_ids": [],
         "pred_bbox_xyxys": [],
         "pred_confidences": [],
-        "pred_track_ids": []
+        "pred_track_ids": [],
+        "frame_id": [frame_num for frame_num in range(int(tot_annotation_frames))]
     }
 
 
-    for frame_num in range(tot_annotation_frames):
+    for frame_num in range(int(tot_annotation_frames)):
         ### GET PRED FRAME TRACKS
         # Calculate the corresponding frame in the predictions
         pred_frame_index = int(round(frame_num * pred_frame_rate / gt_frame_rate))
