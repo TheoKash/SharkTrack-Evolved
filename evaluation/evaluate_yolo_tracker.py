@@ -55,21 +55,42 @@ tracker_class = {
 
 def compute_clear_metrics():
   sequence_metrics = run_mot_challenge(BENCHMARK='val1', METRICS=['CLEAR', 'Identity', 'HOTA'])
-  motas, motps, idf1s, hotas = 0, 0, 0, 0
-  for sequence in sequence_metrics:
-    mota = round(sequence_metrics[sequence]['MOTA'], 2)
-    motp = round(sequence_metrics[sequence]['MOTP'], 2)
-    # idf1 = round(sequence_metrics[sequence]['IDF1'], 2)
-    # hota = round(sequence_metrics[sequence]['HOTA(0)'], 2)
-    motas += mota
-    motps += motp
-    # idf1s += idf1
-    # hotas += hota
+  motas, motps, idf1s, hotas = [], [], [], []
+  # motas, motps, idf1s, hotas = 0, 0, 0, 0
   
-  motas = round(motas / len(sequence_metrics), 2)
-  motps = round(motps / len(sequence_metrics), 2)
-  # idf1s = round(idf1s / len(sequence_metrics), 2)
-  # hotas = round(hotas / len(sequence_metrics), 2)
+  # Could aslo just return COMBINED_SEQ
+  # Might need to divide by len of sequences
+  
+  for sequence in sequence_metrics:
+    if sequence in VAL_SEQUENCES:
+      # exclude COMBINED_SEQ metrics
+      print(f"Sequence: {sequence}")
+      
+      metrics = sequence_metrics[sequence]
+      for metric_category in metrics:
+        print(f"{metric_category}: {metrics[metric_category]}")
+        
+        if metric_category == 'CLEAR':
+          mota = round(metrics[metric_category]['MOTA'], 2)
+          motp = round(metrics[metric_category]['MOTP'], 2)
+          motas.append(mota)
+          motps.append(motp)
+        elif metric_category == 'Identity':
+          idf1 = round(metrics[metric_category]['IDF1'], 2)
+          idf1s.append(idf1)
+        elif metric_category == 'HOTA':
+          hota = round(metrics[metric_category]['HOTA(0)'], 2)
+          hotas.append(hota) 
+  
+      # mota = round(sequence_metrics[sequence]['MOTA'], 2)
+      # motp = round(sequence_metrics[sequence]['MOTP'], 2)
+      # idf1 = round(sequence_metrics[sequence]['IDF1'], 2)
+      # hota = round(sequence_metrics[sequence]['HOTA(0)'], 2)
+      # motas += mota
+      # motps += motp
+      # idf1s += idf1
+      # hotas += hota
+  
 
   return motas, motps, idf1s, hotas
 
@@ -103,7 +124,6 @@ def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, img
   
   if tracker:
     # save prediction annotations to calculate metrics
-    print(all_aligned_annotations)
     save_trackeval_annotations(all_aligned_annotations)
     motas, motps, idf1s, hotas = compute_clear_metrics()
 

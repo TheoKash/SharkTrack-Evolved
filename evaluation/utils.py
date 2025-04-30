@@ -27,7 +27,7 @@ def save_trackeval_annotations(annotations):
     """
     benchmark = 'val1'
     # tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/MPNTrack/data'
-    tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/easy1/data'
+    tracker_annotations_path = f'/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/trackers/mot_challenge/{benchmark}-train/MPN/data'
     # gt_annotations_path = f'/vol/biomedic3/bglocker/ugproj2324/fv220/dev/SharkTrack-Dev/evaluation/TrackEval/data/gt/mot_challenge/'
     gt_annotations_path = f'/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/gt/mot_challenge/'
     dummy_ini = '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/evaluation/TrackEval/data/gt/seqinfo.ini'
