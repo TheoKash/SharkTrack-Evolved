@@ -6,7 +6,10 @@ import os
 
 def extract_frame_number(frame_name):
   assert frame_name.endswith('.jpg')
-  return int(frame_name.replace('.jpg', '').split('_')[-1].replace('frame', ''))
+#   print(f"Initial frame name: {frame_name}")
+  new_frame_name = int(frame_name.replace('.jpg', '').split('_')[-1].replace('frame', ''))
+#   print(f"New frame name: {new_frame_name}")
+  return new_frame_name
 
 
 def save_trackeval_annotations(annotations):
@@ -141,8 +144,12 @@ def align_annotations_with_predictions_dict_corrected(annotations, track_predict
     tot_annotation_frames = gt_frame_rate * video_length
 
     # Calculate the predicted frame rate
+    # print(f"predictions: {track_predictions}")
     tot_pred_frames = len(track_predictions[0])
     pred_frame_rate = tot_pred_frames / video_length
+    
+    # print(f" Number of track predictions: {tot_pred_frames}")
+    # print(f" Number of ground truth annotations assuming {gt_frame_rate}fps: {tot_annotation_frames}")
 
     assert tot_annotation_frames <= tot_pred_frames # orig video > 10fps
 

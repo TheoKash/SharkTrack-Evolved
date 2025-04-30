@@ -20,7 +20,7 @@ sequences_path = '/vol/biomedic3/bglocker/ugproj2324/fv220/datasets/frame_extrac
 sequences_path = '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Videos'
 VAL_SEQUENCES = [
   'easy1',
-  # 'easy2',
+  'easy2',
   # 'medium1',
   # 'medium2',
   # 'difficult1',
@@ -64,33 +64,17 @@ def compute_clear_metrics():
   for sequence in sequence_metrics:
     if sequence in VAL_SEQUENCES:
       # exclude COMBINED_SEQ metrics
-      print(f"Sequence: {sequence}")
+      print(f"Computing CLEAR metrics for sequence: {sequence}")
       
-      metrics = sequence_metrics[sequence]
-      for metric_category in metrics:
-        print(f"{metric_category}: {metrics[metric_category]}")
-        
-        if metric_category == 'CLEAR':
-          mota = round(metrics[metric_category]['MOTA'], 2)
-          motp = round(metrics[metric_category]['MOTP'], 2)
-          motas.append(mota)
-          motps.append(motp)
-        elif metric_category == 'Identity':
-          idf1 = round(metrics[metric_category]['IDF1'], 2)
-          idf1s.append(idf1)
-        elif metric_category == 'HOTA':
-          hota = round(metrics[metric_category]['HOTA(0)'], 2)
-          hotas.append(hota) 
-  
-      # mota = round(sequence_metrics[sequence]['MOTA'], 2)
-      # motp = round(sequence_metrics[sequence]['MOTP'], 2)
-      # idf1 = round(sequence_metrics[sequence]['IDF1'], 2)
-      # hota = round(sequence_metrics[sequence]['HOTA(0)'], 2)
-      # motas += mota
-      # motps += motp
-      # idf1s += idf1
-      # hotas += hota
-  
+      mota = sequence_metrics[sequence]['MOTA']
+      motp = sequence_metrics[sequence]['MOTP']
+      idf1 = sequence_metrics[sequence]['IDF1']
+      hota = sequence_metrics[sequence]['HOTA(0)']
+      
+      motas.append(round(mota, 2))
+      motps.append(round(motp, 2))
+      idf1s.append(round(idf1, 2))
+      hotas.append(round(hota, 2))
 
   return motas, motps, idf1s, hotas
 
@@ -107,6 +91,8 @@ def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, img
     
     # new ( I added the sequunce of frames from the transcoder alligned video to each file under 'frames' )
     sequence_path = os.path.join(sequence_path, 'frames')
+    assert os.path.exists(sequence_path), f'sequence file does not exist {sequence_path}'
+    
 
     print(f"Evaluating {sequence}")
     tracker_obj = tracker_class.get(tracker_type, YoloTracker) # default to YoloTracker for custom trackers
@@ -115,7 +101,8 @@ def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, img
     track_time += time
     
     # Annotations for visualisation
-    aligned_annotations = align_annotations_with_predictions_dict_corrected(annotations, results, 20)
+    video_length =  20
+    aligned_annotations = align_annotations_with_predictions_dict_corrected(annotations, results, video_length)
     all_aligned_annotations[sequence] = (aligned_annotations)
 
     plot_performance_graph(aligned_annotations, sequence)
