@@ -12,7 +12,8 @@ import os
 ALLOWED_AUGMENTATIONS = ["Equalise", "Rotate", "Crop", "Cutout"]
 
 class CustomDataset(Dataset):
-    experimentation_dataset_path = '/vol/biomedic3/bglocker/ugproj2324/fv220/datasets/experimentation_datasets'
+    # experimentation_dataset_path = '/vol/biomedic3/bglocker/ugproj2324/fv220/datasets/experimentation_datasets'
+    experimentation_dataset_path = '/vol/biomedic3/bglocker/ugproj/tk1420/datasets'
 
     def __init__(self, dataset_name, root_dir, subfolder_sampling_ratios, augmentations=[], transforms=[], **kwargs):
         """
@@ -30,7 +31,7 @@ class CustomDataset(Dataset):
         self.dataset_name = dataset_name
 
         assert all([os.path.isdir(os.path.join(root_dir, folder)) for folder in self.subfolders]), \
-            'root_dir should contain only directories'
+            f'root_dir {root_dir} should contain only directories'
         assert len(augmentations) == 0 or [aug in ALLOWED_AUGMENTATIONS for aug in augmentations], \
             f'Augmentations should be one of {ALLOWED_AUGMENTATIONS}'
         
@@ -51,6 +52,7 @@ class CustomDataset(Dataset):
             dataset_size[folder] = original_size
             sampling_ratio = self.subfolder_sampling_ratios[folder]
             dataset_size[folder] = int(original_size * sampling_ratio)
+            print(f'Found {original_size} images in {folder} folder at {folder_path}. Sampling {dataset_size[folder]} images.')
         return dataset_size
     
     def get_img_processor(self, idx):
@@ -154,6 +156,7 @@ class CustomDataset(Dataset):
             subfolder_path = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if self._file_is_image(file)]
 
             subfolder_images = self._sample_images(subfolder_path, folder)
+            print(f'Loading {len(subfolder_images)} images from {folder} folder at {folder_path}')
             assert len(subfolder_images) == self.dataset_size[folder], \
                 f'Number of images should be equal to the dataset size. Got {len(subfolder_images)} images and dataset size {self.dataset_size[folder]}.' 
             

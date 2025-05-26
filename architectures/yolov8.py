@@ -1,5 +1,5 @@
 from data.yolo_dataset import YoloDataset
-from interfaces import Architecture
+# from interfaces import Architecture
 import matplotlib.pyplot as plt
 from ultralytics import YOLO
 import pandas as pd
@@ -9,9 +9,10 @@ import time
 import os
 
 
-class YoloV8(Architecture):
+# class YoloV8(Architecture):
+class YoloV8():
   def __init__(self, hyperparameters, tracker):
-    super().__init__()
+    # super().__init__()
     self.hyperparameters = hyperparameters
     self.tracker = tracker
     
