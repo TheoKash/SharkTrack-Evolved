@@ -21,10 +21,10 @@ sequences_path = '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Videos'
 VAL_SEQUENCES = [
   'easy1',
   'easy2',
-  # 'medium1',
-  # 'medium2',
-  # 'difficult1',
-  # 'difficult2',
+  'medium1',
+  'medium2',
+  'difficult1',
+  'difficult2',
   # 'difficult3',
   # Original sequences
   # 'val1_difficult1',
