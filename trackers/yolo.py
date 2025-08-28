@@ -38,14 +38,18 @@ class YoloTracker:
 
           if mode == 'track':
               tracker_file = self.tracker if 'yaml' in self.tracker else f'{self.tracker}.yaml'
+              #   print(f'Using tracker file: {tracker_file}')
+              # NEW - using the prod tracker file
+              #   tracker_file = 'tracker_5fps.yaml'
+              tracker_file = os.path.join(root_dir, 'trackers', tracker_file)
               results = model.track(
-                  frame_path,
-                  persist=True,
-                  conf=conf_threshold,
-                  iou=iou_association_threshold,
-                  imgsz=imgsz,
-                  tracker=tracker_file,
-                  verbose=False
+                frame_path,
+                persist=True,
+                conf=conf_threshold,
+                iou=iou_association_threshold,
+                imgsz=imgsz,
+                tracker=tracker_file,
+                verbose=False
               )
               tracks = results[0].boxes.id
               track_ids = tracks.int().cpu().tolist() if tracks is not None else []

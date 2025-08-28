@@ -141,7 +141,7 @@ def align_annotations_with_predictions_dict_corrected(annotations, track_predict
     """
     # Ground truth frame rate is given as 10 FPS
     gt_frame_rate = 10
-    tot_annotation_frames = gt_frame_rate * video_length
+    tot_annotation_frames = int(gt_frame_rate * video_length)
 
     # Calculate the predicted frame rate
     # print(f"predictions: {track_predictions}")
@@ -150,8 +150,7 @@ def align_annotations_with_predictions_dict_corrected(annotations, track_predict
     
     # print(f" Number of track predictions: {tot_pred_frames}")
     # print(f" Number of ground truth annotations assuming {gt_frame_rate}fps: {tot_annotation_frames}")
-
-    assert tot_annotation_frames <= tot_pred_frames # orig video > 10fps
+    assert tot_annotation_frames <= tot_pred_frames, f"total annotation frames {tot_annotation_frames} exceed total predicted frames {tot_pred_frames}" # orig video > 10fps
 
     # Initialize the output list
     results = {
@@ -217,6 +216,8 @@ def plot_performance_graph(aligned_annotations, video_name):
     ax.set_xlabel('Frame Number')
     ax.set_ylabel('Number of Tracks / MOTP')
     ax.legend()
+    
+    plt.show()
 
     return fig
 

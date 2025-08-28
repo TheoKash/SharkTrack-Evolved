@@ -25,6 +25,7 @@ VAL_SEQUENCES = [
   'medium2',
   'difficult1',
   'difficult2',
+  'NorthSea1',
   # 'difficult3',
   # Original sequences
   # 'val1_difficult1',
@@ -61,22 +62,59 @@ def compute_clear_metrics():
   # Could aslo just return COMBINED_SEQ
   # Might need to divide by len of sequences
   
+  seqToMetric = {}
   for sequence in sequence_metrics:
     if sequence in VAL_SEQUENCES:
-      # exclude COMBINED_SEQ metrics
-      print(f"Computing CLEAR metrics for sequence: {sequence}")
-      
+      # exclude COMBINED_SEQ metrics      
       mota = sequence_metrics[sequence]['MOTA']
       motp = sequence_metrics[sequence]['MOTP']
       idf1 = sequence_metrics[sequence]['IDF1']
       hota = sequence_metrics[sequence]['HOTA(0)']
       
-      motas.append(round(mota, 2))
-      motps.append(round(motp, 2))
-      idf1s.append(round(idf1, 2))
-      hotas.append(round(hota, 2))
+      seqToMetric[sequence] = {
+        'MOTA': round(mota, 2),
+        'MOTP': round(motp, 2),
+        'IDF1': round(idf1, 2),
+        'HOTA': round(hota, 2)
+      }
 
-  return motas, motps, idf1s, hotas
+  return seqToMetric
+
+def evaluate_per_sequence(model_path, conf_threshold, iou_association_threshold, imgsz, tracker_type=None, show=False):
+  all_aligned_annotations = {}
+  track_time = 0
+  for sequence in VAL_SEQUENCES:
+    sequence_path = os.path.join(sequences_path, sequence)
+    assert os.path.exists(sequence_path), f'sequence file does not exist {sequence_path}'
+
+    annotations_path = os.path.join(sequence_path, 'annotations.csv')
+    assert os.path.exists(annotations_path), f'annotations file does not exist {annotations_path}'
+    annotations = pd.read_csv(annotations_path)
+    
+    # new ( I added the sequunce of frames from the transcoder alligned video to each file under 'frames' )
+    sequence_path = os.path.join(sequence_path, 'frames')
+    assert os.path.exists(sequence_path), f'sequence file does not exist {sequence_path}'
+    
+    print(f"Evaluating {sequence}")
+    tracker_obj = tracker_class.get(tracker_type, YoloTracker) # default to YoloTracker for custom trackers
+    tracker = tracker_obj(model_path, tracker_type)
+    results, time = tracker.track(sequence_path, conf_threshold, iou_association_threshold, imgsz) # [bbox_xyxys, confidences, track_ids]
+    track_time += time
+    
+    # Annotations for visualisation
+    video_length =  20 if sequence != 'NorthSea1' else 19.5
+    aligned_annotations = align_annotations_with_predictions_dict_corrected(annotations, results, video_length)
+    all_aligned_annotations[sequence] = (aligned_annotations)
+    if show:
+      plot_performance_graph(aligned_annotations, sequence)
+
+  if tracker:
+    # save prediction annotations to calculate metrics
+    save_trackeval_annotations(all_aligned_annotations)
+    metrics_per_sequence = compute_clear_metrics()
+
+  return metrics_per_sequence, track_time, get_torch_device(), all_aligned_annotations
+
 
 def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, imgsz, tracker_type):
   all_aligned_annotations = {}
@@ -101,19 +139,24 @@ def evaluate_sequence(model_path, conf_threshold, iou_association_threshold, img
     track_time += time
     
     # Annotations for visualisation
-    video_length =  20
+    video_length =  20 if sequence != 'NorthSea1' else 19.5
     aligned_annotations = align_annotations_with_predictions_dict_corrected(annotations, results, video_length)
     all_aligned_annotations[sequence] = (aligned_annotations)
 
-    plot_performance_graph(aligned_annotations, sequence)
+    # plot_performance_graph(aligned_annotations, sequence)
 
   motas, motps, idf1s = 0, 0, 0 
   
   if tracker:
     # save prediction annotations to calculate metrics
     save_trackeval_annotations(all_aligned_annotations)
-    motas, motps, idf1s, hotas = compute_clear_metrics()
-
+    metrics_per_sequence = compute_clear_metrics()
+    
+    motas = [metrics_per_sequence[sequence]['MOTA'] for sequence in VAL_SEQUENCES]
+    motps = [metrics_per_sequence[sequence]['MOTP'] for sequence in VAL_SEQUENCES]
+    idf1s = [metrics_per_sequence[sequence]['IDF1'] for sequence in VAL_SEQUENCES]
+    hotas = [metrics_per_sequence[sequence]['HOTA'] for sequence in VAL_SEQUENCES]
+    
   return motas, motps, idf1s, hotas, track_time, get_torch_device(), all_aligned_annotations
 
 def evaluate(model_path, conf, iou, imgsz, tracker):

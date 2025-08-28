@@ -4,5 +4,13 @@ models/*
 *.pth
 */__pycache__/
 */TrackEval
-
+training_output_logs/
 .venv/
+runs
+
+YOLOv8/
+*.log
+data-locations*
+report_images
+augs
+.pyc

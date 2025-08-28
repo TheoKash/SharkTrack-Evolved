@@ -11,7 +11,8 @@ sys.path.append(str(root_dir))
 from evaluation.evaluate_yolo_tracker import evaluate
 
 params = {
-  'name': 'v8n_1000e_mosaic0_perspective0.0005_cutmix0.2.75',
+  # 'name': 'v8s_1000e_mosaic0.8_perspective0.0005_cutmix0.1_extra_val',
+  'name': 'p3v6_v8n-prod_val_iou0.5_retake_', # 'p3v6_v11_1000e_mosaic0.8_perspective0.0005_cutmix0.1',
   # 'name': 'p3v6_n2',
   'model_size': 'n', # n, s, m, l, x
   'pretrained_model': None,
@@ -21,11 +22,13 @@ params = {
   'imgsz': 640,
   'patience': 200,
   'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/p3v6/data_config.yaml',
+  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/p3v6_val_restored/data_config.yaml',
+  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/extra_val/data_config.yaml',
   'project_folder': 'models',
   'batch': 64,
   "iou_association_threshold": 0.5,
   "tracker": "botsort.yaml",
-  "conf_threshold": 0.15,
+  "conf_threshold": 0.25,
   "yolo_version": 'yolov8',
   # "yolo_version": 'yolo11',
 }
@@ -38,42 +41,21 @@ params = {
 # model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8s3_500e/weights/best.pt')
 # model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_11s_1000e2/weights/best.pt')
 # model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8s_1000e2/weights/best.pt')
-# model = YOLO("/vol/biomedic3/bglocker/ugproj/tk1420/sharktrack/models/sharktrack.pt")
+model = YOLO("/vol/biomedic3/bglocker/ugproj/tk1420/sharktrack/models/sharktrack.pt")
 # model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8n_1000e_degrees15_mosaic0.75/weights/epoch250.pt')
-model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8n_1000e_mosaic0_perspective0.0005_cutmix0.2/weights/best.pt')
+# model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8n_1000e_mosaic0_perspective0.0005_cutmix0.2/weights/best.pt')
+# model = YOLO("/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8n_1000e_mosaic0.8_perspective0.0005_cutmix0.15/weights/best.pt")
+# model = YOLO("/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8s_1000e_mosaic0.8_perspective0.0005_cutmix0.1/weights/best.pt")
+# model = YOLO('/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v11_1000e_mosaic0.8_perspective0.0005_cutmix0.1/weights/best.pt')
 
-# Train the model
-# model.train(
-#   data=params['data_yaml'],
-#   epochs=params['epochs'],
-#   imgsz=params['imgsz'],
-#   patience=params['patience'],
-#   name=params['name'],
-#   batch=params['batch'],
-#   project = params['project_folder'],
-#   verbose=True,
-#   save_period=50
-# )
 
-# When resuming
-# model.train(resume=True,
-#   data=params['data_yaml'],
-#   epochs=params['epochs'],
-#   imgsz=params['imgsz'],
-#   patience=params['patience'],
-#   name=params['name'],
-#   batch=params['batch'],
-#   project = params['project_folder'],
-#   verbose=True,
-#   save_period=50
-# )
 
 val_results = model.val(
   data=params['data_yaml'],
   conf=params['conf_threshold'],
   plots=True,
   name=params['name'] + '_val_conf' + str(params['conf_threshold']),
-
+  iou=params['iou_association_threshold'],
   )
 
 # print(val_results)
