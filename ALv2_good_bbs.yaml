@@ -1,0 +1,13 @@
+names:
+  0: shark
+path: /vol/biomedic3/bglocker/ugproj/tk1420/
+test: ./test
+train: 
+  - datasets/p3v6/train
+  - datasets/train_ns_backgrounds # new 142 NS backgrounds. Not super diverse
+  # Active Learning Data
+  - sharktrack/AL-Data/B07_30_good_bboxes # 58
+  - sharktrack/AL-Data/C09_240_good_bboxes # 206 new. Omits a all frames from NS1_val
+val: 
+  - datasets/p3v6/val
+  - datasets/NorthSea1_val/val

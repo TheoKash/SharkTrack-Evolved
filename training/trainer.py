@@ -16,24 +16,13 @@ params = {
   'name': 'report-Alv4_v8n_augs_high_iou', # 'report-ALv2-v8n_augs_good_bbs', # 'report-ALv2-v8n_augs_good_bbs',
   # 'name': 'p3v6_n2',
   'model_size': 'n', # n, s, m, l, x
-  # 'pretrained_model': "/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8n_1000e_mosaic0.8_perspective0.0005_cutmix0.15/weights/last.pt",
-  # 'pretrained_model': '/vol/biomedic3/bglocker/ugproj2324/fv220/dev/old/shark_locator_tests/runs/detect/yolov8m_mvd2/best.pt',
-  # 'pretrained_model': '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/p3v6_v8s3/weights/last.pt',
-  # 'pretrained_model': None,
-  'pretrained_model': '/vol/biomedic3/bglocker/ugproj/tk1420/SharkTrack-Dev/models/report-Alv4_v8n_augs_high_iou/weights/last.pt',
+  'pretrained_model': None, # if None, use yolov8n.pt
   'epochs': 500, 
   'imgsz': 640,
   
   'patience': 150, #50
   
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/p3v6_train_with_NS_val',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/datasets/p3v6/data_config.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/p3v6_plus_NS1_train_val__plus_bgs/data_config.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/datasets/p3v6_plus_AL_ns_bgs/data_config.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv1.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv2.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv3.yaml',
-  # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv4.yaml',
+
   'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv4_high_iou.yaml',
   # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv1_good_bbs.yaml',
   # 'data_yaml': '/vol/biomedic3/bglocker/ugproj/tk1420/ALv2_good_bbs.yaml',
@@ -47,7 +36,6 @@ params = {
   "tracker": "tracker_5fps.yaml",
   "conf_threshold": 0.2,
   "yolo_version": 'yolov8',
-  # "yolo_version": 'yolo11',
   # augmentations
   'augmentations': {
     'hsv_h': 0.015,           # hue jitter
@@ -61,9 +49,8 @@ params = {
     'flipud': 0.0,            # vertical flip
     'fliplr': 0.5,            # horizontal flip
     'bgr': 0.0,               # BGR - flips channels
-    'mosaic': 0.8, #0.8,            # mosaic
+    'mosaic': 0.8, #0.8,      # mosaic
     'mixup': 0.0,             # mixup
-    # 'cutmix': 0.1,            # cutmix
   }
 #   base_augmentations = {
 #     'hsv_h': 0.015,           # hue jitter
@@ -81,71 +68,9 @@ params = {
 #     'mixup': 0.0,             # mixup
 #     'cutmix': 0.0,            # cutmix
 # }
-  # ,
-  # 'lighting_aug': {
-  #   'highlight_boost': 0.85,
-  #   'shadow_darken': 0.6,
-  #   'saturation_reduction': 0.35
-  # }
 }
 
-model = YOLO(params['pretrained_model'] or f"{params['yolo_version']}{params['model_size']}.pt")  # load a pretrained model (recommended for training)
-
-##############################################################
-# Harsh Lighting Augmentation
-##############################################################
-
-# import random
-# import cv2
-# import numpy as np
-
-# def apply_harsh_lighting(
-#     img,
-#     highlight_boost = 0.85,
-#     shadow_darken = 0.6,
-#     saturation_reduction = 0.35,
-#     lighting_type="random"  # "radial", "left", "right", or "random"
-# ):
-#     """Apply harsh lighting with radial or directional effects"""
-#     # Convert to float32 for processing
-#     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV).astype(np.float32)
-#     h, s, v = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
-#     rows, cols = v.shape[:2]
-    
-#     # Randomly select lighting type if unspecified
-#     if lighting_type == "random":
-#         lighting_type = random.choice(["radial", "left", "right"])
-#         print(f"Using random lighting type: {lighting_type}")
-    
-#     # Generate lighting mask
-#     if lighting_type == "radial":
-#         center_x, center_y = cols // 2, rows // 2
-#         max_radius = np.sqrt(center_x**2 + center_y**2)
-#         y, x = np.ogrid[:rows, :cols]
-#         dist = np.sqrt((x - center_x)**2 + (y - center_y)**2) / max_radius
-#         mask = 1 - np.clip(dist, 0, 1)
-#     else:  # Directional (left/right)
-#         grad = np.linspace(0, 1, cols)
-#         if lighting_type == "left":
-#             mask = 1 - grad  # Bright on left, dark on right
-#         else:  # "right"
-#             mask = grad     # Bright on right, dark on left
-#         mask = np.tile(mask, (rows, 1))  # Expand to 2D
-
-#     # Apply lighting effects
-#     v = v * (1 + highlight_boost * mask)
-#     v = np.clip(v, 0, 255)
-    
-#     v = v * (1 - shadow_darken * (1 - mask))
-#     v = np.clip(v, 0, 255)
-    
-#     s = s * (1 - saturation_reduction * mask)
-#     s = np.clip(s, 0, 255)
-
-#     # Convert back to RGB
-#     hsv_out = np.stack([h, s, v], axis=-1)
-#     return cv2.cvtColor(hsv_out.astype(np.uint8), cv2.COLOR_HSV2RGB)
-        
+model = YOLO(params['pretrained_model'] or f"{params['yolo_version']}{params['model_size']}.pt")  # load a pretrained model (recommended for training)        
 
 
 # Train the model

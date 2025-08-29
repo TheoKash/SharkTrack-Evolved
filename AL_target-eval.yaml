@@ -1,0 +1,13 @@
+names:
+  0: shark
+path: /vol/biomedic3/bglocker/ugproj/tk1420/
+test: ./test
+train: ./train
+val: 
+  - datasets/NorthSea1_val/val # 190
+  - datasets/val_ns_backgrounds # New to help with NorthSea FPs (77 imgs)
+  - sharktrack/AL-Data/C05_120 # 177 not used in any training (well annotated)
+  # Temp to test ALv1 with lower HSV augs (although perfectly valid as val images incl ALv4 - well annot)
+  - sharktrack/AL-Data/B07_120 # 25
+  - sharktrack/AL-Data/C05_30 # 39 not used in any training
+  # 190 + 177 + 25 +39 = 431

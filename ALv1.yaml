@@ -1,0 +1,12 @@
+names:
+  0: shark
+path: /vol/biomedic3/bglocker/ugproj/tk1420/
+test: ./test
+train: 
+  - datasets/p3v6/train
+  # Active Learning Data
+  - sharktrack/AL-Data/B07_30 # 58
+  
+val: 
+  - datasets/p3v6/val
+  - datasets/NorthSea1_val/val
